@@ -16,6 +16,7 @@ public class InputReader : ScriptableObject, IPlayerActions
     public event Action OnPlayerLook;
     public event Action OnPlayerJump;
     public event Action OnPlayerDash;
+    public event Action OnPlayerExtract;
     #endregion
 
     #region Input Values
@@ -79,8 +80,8 @@ public class InputReader : ScriptableObject, IPlayerActions
         OnPlayerShoot?.Invoke();
     }
 
-    public void OnAttack(InputAction.CallbackContext context)
+    public void OnExtract(InputAction.CallbackContext context)
     {
-        
+        OnPlayerExtract?.Invoke();
     }
 }

@@ -1,6 +1,8 @@
 using System.Collections;
 using TMPro;
+using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GamePlayManager : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class GamePlayManager : MonoBehaviour
     public float currentDifficulty = 5;
 
     public bool IsGameOn { get; private set; } = true;
+    private bool isInsideArea = false;
 
     private PlayerMovement playerMovement;
 
@@ -25,6 +28,10 @@ public class GamePlayManager : MonoBehaviour
 
     [SerializeField] private CanvasGroup controlsPanel;
     [SerializeField] private TMP_Text introText;
+    [SerializeField] private GameObject restartPanel;
+    [SerializeField] private GameObject extractedPanel;
+    [SerializeField] private InputReader inputReader;
+    [SerializeField] private GameObject ectractionText;
 
     private static GamePlayManager instance;
     public static GamePlayManager Instance
@@ -43,11 +50,33 @@ public class GamePlayManager : MonoBehaviour
     {
         if(instance != null && instance != this) Destroy(this);
         if(instance == null) instance = this;
+
+        restartPanel.SetActive(false);
+        extractedPanel.SetActive(false);
+        ectractionText.gameObject.SetActive(false);
     }
 
     void Start()
     {
         StartCoroutine(InitiateTheGame());
+    }
+
+    void OnEnable()
+    {
+        inputReader.OnPlayerExtract += PlayerExtracted;
+    }
+
+    void OnDisable()
+    {
+        inputReader.OnPlayerExtract -= PlayerExtracted;
+    }
+
+    private void PlayerExtracted()
+    {
+        if(isInsideArea)
+        {
+            GameEndedByExtract();
+        }
     }
 
     private IEnumerator InitiateTheGame()
@@ -111,6 +140,11 @@ public class GamePlayManager : MonoBehaviour
         {
             PlayerPrefs.SetFloat(PlayerBestScore, playerCurrentGameScore);
         }
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        restartPanel.SetActive(true);
     }
 
     public void GameEndedByExtract()
@@ -124,6 +158,16 @@ public class GamePlayManager : MonoBehaviour
         {
             PlayerPrefs.SetFloat(PlayerBestScore, playerCurrentGameScore);
         }
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        extractedPanel.SetActive(true);
+    }
+
+    public void RestartTheGame()
+    {
+        SceneManager.LoadScene("Game");
     }
 
     public void PlayerScoreIncrease(int amount)
@@ -140,6 +184,12 @@ public class GamePlayManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         CheckForNewBest();
+    }
+
+    public void PlayerAreaState(bool state)
+    {
+        isInsideArea = state;
+        ectractionText.SetActive(state);
     }
 
     private void CheckForNewBest()
