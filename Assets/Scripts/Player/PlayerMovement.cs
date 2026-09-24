@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Sprint Settings")]
     [SerializeField] private float sprintMultiplier = 1f;
     [SerializeField] private float maxSprintCapacity = 5f;
+    [SerializeField] private Image sprintBarImage;
     [SerializeField] private float crouchMultiplier = 1f;
     [SerializeField] private float originalHeight = 0.95f;
 
@@ -121,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
         {
             sprintCapacity += Time.deltaTime;
         }
+        sprintBarImage.fillAmount = sprintCapacity/maxSprintCapacity;
 
         RotatePlayer();
     }
