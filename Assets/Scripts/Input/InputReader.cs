@@ -15,6 +15,7 @@ public class InputReader : ScriptableObject, IPlayerActions
     public event Action OnPlayerShoot;
     public event Action OnPlayerLook;
     public event Action OnPlayerJump;
+    public event Action OnPlayerDash;
     #endregion
 
     #region Input Values
@@ -47,9 +48,9 @@ public class InputReader : ScriptableObject, IPlayerActions
         OnPlayerCrouch?.Invoke(context.performed);
     }
 
-    public void OnInteract(InputAction.CallbackContext context)
+    public void OnDash(InputAction.CallbackContext context)
     {
-        // Nothing here
+        OnPlayerDash?.Invoke();
     }
 
     public void OnJump(InputAction.CallbackContext context)

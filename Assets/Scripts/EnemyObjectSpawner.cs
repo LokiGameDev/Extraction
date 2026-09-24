@@ -9,6 +9,18 @@ public class EnemyObjectSpawner : MonoBehaviour
     [SerializeField] private Vector2 minValue = new(-50, -50);
     [SerializeField] private Vector2 maxValue = new(50, 50);
 
+    private ObjectPool<EnemyObject> enemyPool;
+
+    private void Awake()
+    {
+        enemyPool = new ObjectPool<EnemyObject>
+        (
+            enemyObjectPrefab,
+            10,
+            transform
+        );
+    }
+
     public void StartSpawning()
     {
         StartCoroutine(StartSpawningRandomly());
@@ -18,7 +30,7 @@ public class EnemyObjectSpawner : MonoBehaviour
     {
         while(GamePlayManager.Instance.IsGameOn)
         {
-            Instantiate(enemyObjectPrefab, GetRandomSpawnPoint(), Quaternion.identity);
+            SpawnEnemyObject();
             yield return new WaitForSeconds(Random.Range(spawnInterval, spawnInterval + 5));
         }
     }
@@ -26,6 +38,17 @@ public class EnemyObjectSpawner : MonoBehaviour
     private Vector3 GetRandomSpawnPoint()
     {
         return new Vector3(Random.Range(minValue.x, maxValue.x), 1.5f, Random.Range(minValue.y, maxValue.y));
+    }
+
+    public void SpawnEnemyObject()
+    {
+        EnemyObject enemyObject = enemyPool.Get(GetRandomSpawnPoint(), Quaternion.identity);
+        enemyObject.Setup(this);
+    }
+
+    public void ReturnEnemyObject(EnemyObject enemy)
+    {
+        enemyPool.Return(enemy);
     }
 
     void OnDrawGizmosSelected()

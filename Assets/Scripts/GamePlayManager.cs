@@ -10,7 +10,11 @@ public class GamePlayManager : MonoBehaviour
     private int playerCurrentGameScore = 0;
     private int playerCurrentGameTime = 0;
 
+    public float currentDifficulty = 5;
+
     public bool IsGameOn { get; private set; } = true;
+
+    private PlayerMovement playerMovement;
 
     [SerializeField] private ScoreObjectSpawner scoreObjectSpawner;
     [SerializeField] private EnemyObjectSpawner enemyObjectSpawner;
@@ -18,6 +22,9 @@ public class GamePlayManager : MonoBehaviour
 
     [SerializeField] private TMP_Text currentTimeText;
     [SerializeField] private TMP_Text currentScoreText;
+
+    [SerializeField] private CanvasGroup controlsPanel;
+    [SerializeField] private TMP_Text introText;
 
     private static GamePlayManager instance;
     public static GamePlayManager Instance
@@ -38,19 +45,58 @@ public class GamePlayManager : MonoBehaviour
         if(instance == null) instance = this;
     }
 
+    void Start()
+    {
+        StartCoroutine(InitiateTheGame());
+    }
+
+    private IEnumerator InitiateTheGame()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        
+        float time = 0;
+        while(time < 2)
+        {
+            time += Time.deltaTime;
+
+            controlsPanel.alpha = 1 - time/2;
+
+            yield return null;
+        }
+        controlsPanel.alpha = 0;
+        introText.gameObject.SetActive(true);
+
+        while (introText.fontSize < 150)
+        {
+            introText.fontSize += 200f * Time.deltaTime;
+            yield return null;
+        }
+
+        // Decrease
+        while (introText.fontSize > 50)
+        {
+            introText.fontSize -= 200f * Time.deltaTime;
+            yield return null;
+        }
+        introText.gameObject.SetActive(false);
+
+        StartTheGame();
+    }
+
     public void StartTheGame()
     {
         playerCurrentGameScore = 0;
         playerCurrentGameTime = 0;
 
-        Instantiate(playerPrefab);
+        playerMovement = Instantiate(playerPrefab).GetComponent<PlayerMovement>();
         
         scoreObjectSpawner.StartSpawning();
         enemyObjectSpawner.StartSpawning();
 
         currentScoreText.text = $"{playerCurrentGameScore}";
         currentTimeText.text = $"{playerCurrentGameTime}";
-        
+
         StartCoroutine(GameTimeCounter());
     }
 
@@ -84,6 +130,11 @@ public class GamePlayManager : MonoBehaviour
     {
         playerCurrentGameScore += amount;
         currentScoreText.text = $"{playerCurrentGameScore}";
+    }
+
+    public void PlayerGotHit(int amount, Vector3 position)
+    {
+        playerMovement.TakeDamage(amount, position);
     }
 
     private void OnApplicationQuit()

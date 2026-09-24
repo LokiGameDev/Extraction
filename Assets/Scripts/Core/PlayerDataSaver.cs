@@ -3,14 +3,12 @@ using UnityEngine;
 
 public static class PlayerDataSaver
 {
-    static string filePath = Path.Combine(Application.persistentDataPath, "playerData.json");
-
     public static void SavePlayerData(PlayerData data)
     {
         string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(filePath, json);
-
-        Debug.Log("Saved to: " + filePath);
+        
+        PlayerPrefs.SetString("SaveData", json);
+        PlayerPrefs.Save();
     }
 
     public static void SavePlayerData(PlayerTime time, int score)
@@ -22,17 +20,20 @@ public static class PlayerDataSaver
         };
 
         string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(filePath, json);
 
-        Debug.Log("Saved to: " + filePath);
+        PlayerPrefs.SetString("SaveData", json);
+        PlayerPrefs.Save();
     }
 
     public static PlayerData LoadPlayerData()
     {
-        if (!File.Exists(filePath))
-            return null;
+        string json = PlayerPrefs.GetString("SaveData", "");
 
-        string json = File.ReadAllText(filePath);
+        if (string.IsNullOrEmpty(json))
+        {
+            PlayerData data = new PlayerData(0,0,0,0);
+            json = JsonUtility.ToJson(data, true);;
+        }
 
         return JsonUtility.FromJson<PlayerData>(json);
     }
